@@ -1,0 +1,160 @@
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
+
+using namespace std;
+
+class SensorFactory;
+
+class Sensor{
+private:
+    string sensor;
+public:
+    virtual void gatherData() = 0;
+    virtual void processData() = 0;
+    virtual string SensorName() = 0;  //Had to use ChatGPT to help with finding the best method to include the sensor type in the constructor and destructor
+    
+    virtual ~Sensor() {
+    
+   };
+};
+
+class TempSensor : public Sensor{
+private:
+    //No needed private variables or functions
+public:
+
+    TempSensor(){ //Contructor
+    cout << "Sensor created " << this << "of type " << this->SensorName() << endl;
+
+    }
+    ~TempSensor(){ //Destructor
+    cout << "Sensor deleted " << this << "of type " << this->SensorName() << endl;
+    }
+    
+    void gatherData() override{
+        cout << "Gathering data from temperature sensor" << endl;
+    }
+    void processData() override{
+        cout << "Processing data from temperature sensor" << endl;
+    }
+    string SensorName() override{ //Used for constructor and destructor outputs
+        return "TEMPERATURE";
+    }
+    
+    
+    
+};
+
+class PressureSensor : public Sensor{
+private:
+        //No needed private variables or functions
+public:
+    PressureSensor(){ //Contructor
+    cout << "Sensor created " << this << "of type " << this->SensorName() << endl;
+
+    }
+    ~PressureSensor(){ //Destructor
+    cout << "Sensor deleted " << this << "of type " << this->SensorName() << endl;
+    }
+    
+    void gatherData() override{
+        cout << "Gathering data from pressure sensor" << endl;
+    }
+    void processData() override{
+        cout << "Processing data from pressure sensor" << endl;
+    }
+    string SensorName() override{ //Used for constructor and destructor outputs
+        return "PRESSURE";
+    }
+   
+};
+
+class AltitudeSensor : public Sensor{
+private:
+        //No needed private variables or functions
+public:
+    AltitudeSensor(){ //Contructor
+    cout << "Sensor created " << this << "of type " << this->SensorName() << endl;
+
+    }
+    ~AltitudeSensor(){ //Destructor
+    cout << "Sensor deleted " << this << "of type " << this->SensorName() << endl;
+    }
+    
+    void gatherData() override{
+        cout << "Gathering data from altitude sensor" << endl;
+    }
+    void processData() override{
+        cout << "Processing data from altitude sensor" << endl;
+    }
+    string SensorName() override{ //Used for constructor and destructor outputs
+        return "ALTITUDE";
+    }
+   
+};
+
+class SensorFactory{
+private:
+        //No needed private variables or functions
+public:
+    
+    static shared_ptr<Sensor> createsensor( const string& SensorType){
+      //[ Determining which sensor is input so the pointer can be shared with the right sensor class
+        if(SensorType == "TEMPERATURE"){ 
+            shared_ptr<TempSensor> sensor_pointer = make_shared<TempSensor>();
+            return sensor_pointer;
+        } else if(SensorType == "PRESSURE"){
+            shared_ptr<PressureSensor> sensor_pointer = make_shared<PressureSensor>();
+            return sensor_pointer;
+        }else if (SensorType == "ALTITUDE"){
+            shared_ptr<AltitudeSensor> sensor_pointer = make_shared<AltitudeSensor>();
+            return sensor_pointer;
+        }else{
+            return nullptr;
+        }
+//]
+    }
+};
+
+
+
+
+class AerospaceControlSystem{
+private:
+    vector<shared_ptr<Sensor>> sensors; // Stores sensors to manage their lifetime
+
+public:
+    void addSensor( shared_ptr<Sensor> sensor){
+        if (sensor) {
+                    sensors.push_back(sensor); // Adding sensor to a vector
+
+                }
+    }
+    void monitorAndAdjust(){
+   
+        for (const auto& sensor : sensors) { //iterating through each of the sensors in the vector 'sensnors'
+                   sensor->gatherData();
+                   sensor->processData();
+                   cout << "Adjusting controls based on sensor data." << endl;
+               }
+        
+    }
+    
+};
+
+int main() {
+    AerospaceControlSystem ctrlSys; //Creating an object called ctrlSys from the AerospaceControlSystem class
+    
+    ctrlSys.addSensor(SensorFactory::createsensor("TEMPERATURE")); //Adding a temperature sensor to the sensors vector
+    ctrlSys.addSensor(SensorFactory::createsensor("PRESSURE")); //Adding a pressure sensor to the sensors vector
+    ctrlSys.addSensor(SensorFactory::createsensor("ALTITUDE")); //Adding a altitude sensor to the sensors vector
+    
+    ctrlSys.monitorAndAdjust(); //calling the monitorAndAdjust function based on the sensors in the sensors vector
+    
+   
+
+    return 0;
+}
