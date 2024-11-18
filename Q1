@@ -124,12 +124,12 @@ public:
 
 class AerospaceControlSystem{
 private:
-    vector<shared_ptr<Sensor>> sensors; // Stores sensors to manage their lifetime
+    vector<shared_ptr<Sensor>> sensors; // Stores sensors to be used to cylce through for the monitorAndAdjust function
 
 public:
     void addSensor( shared_ptr<Sensor> sensor){
         if (sensor) {
-                    sensors.push_back(sensor); // Adding sensor to a vector
+                    sensors.push_back(sensor); // Adding sensor to the sensors vector
 
                 }
     }
