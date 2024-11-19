@@ -1,0 +1,72 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <vector>
+#include <chrono>
+
+using namespace std;
+
+// Set variables - number of robots and event timespans
+const int numRobots = 5;
+const int pickUpTime = 1;
+const int taskTime = 5;
+
+//Mutexes to represent number of tools
+mutex tools[numRobots];
+
+//function for robots to "do" tasks
+void taskFunction(int robotNumber)
+{
+	//Assigning tools left and right of robot
+	int toolLeft = robotNumber;
+	int toolRight = (robotNumber + 1) % numRobots;
+
+	//Lock tools - Fix for last robot - done
+	if (toolLeft < toolRight)
+	{
+		tools[toolLeft].lock();
+		tools[toolRight].lock();
+	}
+	else
+	{
+		tools[toolRight].lock();
+		tools[toolLeft].lock();
+	}
+	
+	//Reach for tools 
+	cout << "Robot " << robotNumber << " is reaching for tools \n";
+
+	//Wait to pick up tools
+	this_thread::sleep_for(chrono::seconds(pickUpTime));
+
+	//Grab tools
+	cout << "Robot " << robotNumber<< " picked up tools " << toolLeft << " and " << toolRight << "\n";
+
+	//Wait to complete tasks
+	this_thread::sleep_for(chrono::seconds(taskTime));
+
+	//Complete Task
+	cout << "Robot " << robotNumber << " has completed its task and released its tools. \n";
+
+	//Unlock Tools
+	tools[toolLeft].unlock();
+	tools[toolRight].unlock();
+}
+
+
+
+int main()
+{
+	vector <thread> robots;
+	for (int i = 0; i < numRobots; ++i)
+	{
+		robots.push_back(thread(taskFunction, i));
+	}
+	for (auto& robot:robots)
+	{
+		robot.join();
+	}
+	cout << "All Tasks Complete";
+	
+	return 0;
+}
