@@ -12,7 +12,7 @@ class Sensor{
 private:
     string sensor;
 public:
-    virtual void gatherData() = 0;
+    virtual void gatherData() = 0; Used online resources for debugging to determine that the functions should be = 0 to declare them a pure virtual functions.
     virtual void processData() = 0;
     virtual string SensorName() = 0;  //Had to use ChatGPT to help with finding the best method to include the sensor type in the constructor and destructor
     
