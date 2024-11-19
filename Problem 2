@@ -34,19 +34,19 @@ void taskFunction(int robotNumber)
 	}
 	
 	//Reach for tools 
-	cout << "Robot " << robotNumber << " is reaching for tools \n";
+	cout << "Robot " << robotNumber+1 << " is reaching for tools \n";
 
 	//Wait to pick up tools
 	this_thread::sleep_for(chrono::seconds(pickUpTime));
 
 	//Grab tools
-	cout << "Robot " << robotNumber<< " picked up tools " << toolLeft << " and " << toolRight << "\n";
+	cout << "Robot " << robotNumber+1<< " picked up tools " << toolLeft+1 << " and " << toolRight+1 << "\n";
 
 	//Wait to complete tasks
 	this_thread::sleep_for(chrono::seconds(taskTime));
 
 	//Complete Task
-	cout << "Robot " << robotNumber << " has completed its task and released its tools. \n";
+	cout << "Robot " << robotNumber+1 << " has completed its task and released its tools. \n";
 
 	//Unlock Tools
 	tools[toolLeft].unlock();
@@ -61,6 +61,7 @@ int main()
 	for (int i = 0; i < numRobots; ++i)
 	{
 		robots.push_back(thread(taskFunction, i));
+		this_thread::sleep_for(chrono::seconds(1)); //Talk to prof tomorrow - how to stop overlap on cout statements
 	}
 	for (auto& robot:robots)
 	{
