@@ -1,0 +1,135 @@
+// Question 3
+
+#include <iostream>
+#include <random>
+#include <thread>
+// Used ChatGPT to determine the use of the chrono library and understand its applications 
+#include <chrono> // library used for time manipulation (time measurements)
+
+// Recommended use of following libraries 
+#include <mutex>
+#include <condition_variable>
+#include <queue>
+#include <atomic> // std::atomic - ensure series of operations on shared data is performed without interruption
+
+using namespace std;
+// Adding the rules that will relate to the libraries being used below 
+
+mutex coutmutex;
+mutex ATCmutex; // Using the mutex library to control access to the ATC
+condition_variable ATCcondition; // Using the condition variable library for ATC communication
+atomic<bool> ATCValidCommunication(false); 
+// ATCValidCommunication means that the ATC is talking to a pilot 
+// Second rule: checking if ATC is talking to another pilot
+
+// ATCValidCommunication being false means that the first rule is applied (ATC personnel falls asleep)
+// Third rule: If ATC asleep then establish communication to wake ATC up 
+
+
+queue<int> TrafficPattern; 
+// Queue library used for representing the number of aircrafts in the traffic pattern
+// Second rule: pilots needs to check how many aircrafts are in the traffic pattern
+// Fourth rule: enter traffic pattern queue if not full but ATC talking to another pilot
+const int maximum_traffic_allowed = 3; // Max number of aircrafts in traffic pattern (can only contain 3)
+// Fifth rule: divert to other airport if traffic pattern full
+
+atomic<int> CountingAircrafts(0); // Second rule: pilots needs to check how many aircrafts in the traffic pattern
+// The counter is tracking the number of aircrafts arriving
+const int final_number_aircrafts = 10; // total number of aircrafts (simulate scenario for 10 incoming aircrafts)
+int number_of_airplanes = 0; // initialize
+bool redirect_plane = false;
+bool final_plane = false;
+
+// Function simulating landing the aircraft 
+void LandingAircrafts(int IDofaircraft)
+{
+    unique_lock<std::mutex> lock(ATCmutex);
+
+    if(!ATCValidCommunication)
+    {
+        lock_guard<std::mutex> coutLock(coutmutex);
+        ATCValidCommunication = true;
+        cout << "Aircraft #" << IDofaircraft << " causes ATC to wake up since it is establishing communication.\n"; 
+    }
+    else 
+    {
+        if(TrafficPattern.size() < maximum_traffic_allowed && !redirect_plane) // determines that traffic pattern is not full but that another aircraft is talking to ATC
+        {
+            lock_guard<std::mutex> coutLock(coutmutex);
+            TrafficPattern.push(IDofaircraft); // adding the id of the aircraft to the back of the traffic pattern queue
+            cout << "Aircraft #" << IDofaircraft << " has been added to the traffice pattern.\n";
+            cout << "The total number of aircrafts in the traffic pattern is: " << TrafficPattern.size() << " Aircrafts.\n";
+        }
+        else // Traffic pattern full (above 3 aircrafts) and ATC talking to another aircraft
+        {
+            lock_guard<std::mutex> coutLock(coutmutex);
+            cout << "Aircraft #" << IDofaircraft << " has been divered to another airport due to full traffic pattern.\n"; 
+            redirect_plane = true;
+            return;
+        }
+
+        if(!TrafficPattern.empty())
+        {
+            lock_guard<std::mutex> coutLock(coutmutex);
+            TrafficPattern.pop(); // Removes the front/top element from the queue
+            // First element removed is the one that has been in the queue the longest - "first in, first out"
+            // Used ChatGPT to apply this and remove the element from the Traffic Pattern queue
+            cout << "Aircraft #" << IDofaircraft << " is requesting to land.\n";
+            cout << "Aircraft " << IDofaircraft << " has landed and is being removed from the traffice pattern.\n";
+            cout << "The remaining number of aircrafts in the traffic pattern is: " << TrafficPattern.size() << " Aircrafts.\n";
+            cout << "Runway is now free.\n";
+            this_thread::sleep_for(std::chrono::milliseconds(500)); // landing simulated
+            number_of_airplanes++;
+        }
+        // After talking with the aircraft, the ATC willl fall back asleep
+        ATCValidCommunication = false;
+        // Sixth rule: if ATC finishes talking to a pilot, ATC falls asleep until next pilot initiates communication
+        redirect_plane = false;
+        ATCcondition.notify_one(); // notifies the next aircraft to proceed with establisihing communication with ATC
+    }
+
+    this_thread::sleep_for(std::chrono::milliseconds(500)); // landing simulated
+
+    if(IDofaircraft == final_number_aircrafts)
+    {
+        final_plane = true;
+    }
+
+};
+
+int main()
+{
+    auto starting_time = chrono::steady_clock::now(); // starting the timer
+
+    vector<std::thread> aircraftThreads;
+
+    for (int i = 1; i<= 10; ++i)
+    {
+        aircraftThreads.emplace_back(LandingAircrafts, i);
+        random_device rd;
+        mt19937 gen(rd());
+
+        int minimum = 0;
+        int maximum = 2000;
+        // Defining a range
+
+        // generate random number between the inclusive minimum and maximum
+        uniform_int_distribution<> dis(minimum,maximum);
+        int time = dis(gen);
+
+        this_thread::sleep_for(std::chrono::milliseconds(time)); // landing simulated 
+    };
+
+    // Joining all threads
+    for (auto& thread : aircraftThreads)
+    {
+        thread.join();
+    };
+
+    auto ending_time = chrono::steady_clock::now(); // ending the timer
+    chrono::duration<double> elapsed_seconds = ending_time - starting_time; // Calculating the duration of the timer
+    
+    cout << "Program duration: " << elapsed_seconds.count() << " seconds.\n";
+
+    return 0;
+}
