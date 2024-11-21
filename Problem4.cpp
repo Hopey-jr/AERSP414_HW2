@@ -3,6 +3,14 @@
 /*This code plots the orbital energy equation, specifically energy vs velocity over time using openCV. The first plot is 
 a normal plot, but the second plot is the data from the CSV file that was written and read in this code*/ 
 
+/*Sources 
+https://stackoverflow.com/questions/15955305/find-maximum-value-of-a-cvmat
+https://www.geeksforgeeks.org/python-opencv-cv2-puttext-method/
+https://www.geeksforgeeks.org/how-to-read-data-from-csv-file-to-a-2d-array-in-cpp/
+https://www.geeksforgeeks.org/csv-file-management-using-c/
+
+*/
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <vector>
