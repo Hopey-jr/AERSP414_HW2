@@ -77,7 +77,6 @@ void LandingAircrafts(int IDofaircraft)
         {
             number_of_airplanes++;  
             lock_guard<std::mutex> coutLock(coutmutex);
-            number_of_airplanes++;
             cout << "Airplane #" << IDofaircraft << " is requesting to land." << endl;
             cout << "Airplane #" << IDofaircraft << " is cleared to land." << endl;
             this_thread::sleep_for(std::chrono::milliseconds(500)); // landing simulated
