@@ -90,7 +90,8 @@ void LandingAircrafts(int IDofaircraft)
 
     // Remove from traffic pattern 
     {
-        unique_lock<std::mutex> runwaylock(runway);                                                                         // runwaylock is never used and it is destroyed at the end of the scope
+// runway may not be used and destroyed at end of scope 
+        unique_lock<std::mutex> runwaylock(runway);                                                                         
         number_of_airplanes--; // remove aircraft from traffic pattern 
         if (number_of_airplanes == 0)
         {
@@ -124,7 +125,7 @@ int main()
         mt19937 gen(rd());
 
         int minimum = 0;
-        int maximum = 2000;                                                                             // Shortened this
+        int maximum = 2000;                                                                             
         // Defining a range
 
         // Generating random number between the inclusive minimum and maximum
