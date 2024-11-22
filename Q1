@@ -128,10 +128,12 @@ private:
 
 public:
     void addSensor( shared_ptr<Sensor> sensor){
-        if (sensor) {
+        /[ Had to use chatgpt to help debug this part. Previously, I had to call the monitorAndAdjust function for each sensor individually which led to the creation of each sensor twice. This method saves the sensor instead so a new one doesn't have to be created
+                if (sensor) {
                     sensors.push_back(sensor); // Adding sensor to the sensors vector
 
                 }
+        /]
     }
     void monitorAndAdjust(){
    
